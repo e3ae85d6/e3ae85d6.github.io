@@ -4,6 +4,7 @@
 <head>
 
 <script>
+
 window.onload = function () {
   var searchArgs = location.href.match("[^?]+\\?([^=]+=[^&]*&?)+");
 
@@ -13,13 +14,22 @@ window.onload = function () {
       if(codeArg && (codeArg.length > 1)) {
         var authCode = codeArg[1];
         //alert("authCode\n" + authCode);
-        if(parent) {
+        if(inIframe()) {
           parent.postMessage(authCode, "*");
         }
       }
     }
   }
 }
+
+function inIframe () {
+    try {
+        return window.self !== window.top;
+    } catch (e) {
+        return true;
+    }
+}
+
 </script>
 
 </head>
