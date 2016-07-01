@@ -12,7 +12,10 @@ window.onload = function () {
       var codeArg = searchArgs[i].match("code=(.*)");
       if(codeArg && (codeArg.length > 1)) {
         var authCode = codeArg[1];
-        alert("authCode\n" + authCode);
+        //alert("authCode\n" + authCode);
+        if(parent) {
+          parent.postMessage(authCode, "*");
+        }
       }
     }
   }
