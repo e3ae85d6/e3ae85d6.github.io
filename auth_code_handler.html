@@ -13,13 +13,6 @@ window.onload = function () {
       if(codeArg && (codeArg.length > 1)) {
         var authCode = codeArg[1];
         alert("authCode\n" + authCode);
-
-        /*$j("#loginIframeContainer").hide();
-        if(REST.tokenProvider.authCodeDeferred) {
-          REST.tokenProvider.authCodeDeferred.resolve(authCode);
-          REST.tokenProvider.authCodeDeferred = undefined;
-        }*/
-
       }
     }
   }
