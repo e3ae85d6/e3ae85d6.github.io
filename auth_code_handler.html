@@ -15,7 +15,7 @@ window.onload = function () {
         var authCode = codeArg[1];
         //alert("authCode\n" + authCode);
         if(inIframe()) {
-          parent.postMessage(authCode, "*");
+          parent.postMessage("authcode", "*", authCode);
         }
       }
     }
