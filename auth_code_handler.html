@@ -17,7 +17,7 @@ window.onload = function () {
         //alert("authCode\n" + authCode);
         
         if(inIframe()) {
-          parent.postMessage(authCode, "null");
+          parent.postMessage(authCode, "*");
         }
       }
     }
