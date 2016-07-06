@@ -16,13 +16,16 @@ window.onload = function () {
         
         //alert("authCode\n" + authCode);
         
-        if(inIframe()) {
-          parent.postMessage(authCode, "*");
+        try {
+          if(window.self !== window.top) { // we are in iframe
+            parent.postMessage(authCode, "*");
+          }
+          else if(window.self !== window.opener) { // we are in new tab/window
+            window.opener.postMessage(authCode, "*");
+            //window.close();
+          }
         }
-        else if(inTab()) {
-          window.opener.postMessage(authCode, "*");
-          window.close();
-        }
+        catch (ex) { }
       }
     }
   }
