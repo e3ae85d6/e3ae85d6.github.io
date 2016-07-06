@@ -19,6 +19,10 @@ window.onload = function () {
         if(inIframe()) {
           parent.postMessage(authCode, "*");
         }
+        else if(inTab()) {
+          window.opener.postMessage(authCode, "*");
+          window.close();
+        }
       }
     }
   }
@@ -30,6 +34,15 @@ function inIframe () {
     } catch (e) {
         return true;
     }
+}
+
+function inTab () {
+  try {
+    return window.self !== window.opener;
+  }
+  catch (e) {
+    return false;
+  }
 }
 
 </script>
