@@ -14,37 +14,23 @@ window.onload = function () {
       if(codeArg && (codeArg.length > 1)) {
         var authCode = codeArg[1];
         
-        //alert("authCode\n" + authCode);
-        
         try {
-          if(window.self !== window.top) { // we are in iframe
+          if(window.self != window.top) { // we are in iframe
             window.parent.postMessage(authCode, "*");
           }
-          else if(window.self !== window.opener) { // we are in new tab/window
-            window.opener.top.postMessage(authCode, "*");
+          else if(window.self != window.opener) { // we are in new tab/window
+            window.opener.parent.postMessage(authCode, "*");
             //window.close();
           }
         }
-        catch (ex) { }
+        catch (ex) {
+          console.log(ex);
+        }
+        finally {
+          console.log("authCode\n" + authCode);
+        }
       }
     }
-  }
-}
-
-function inIframe () {
-    try {
-        return window.self !== window.top;
-    } catch (e) {
-        return true;
-    }
-}
-
-function inTab () {
-  try {
-    return window.self !== window.opener;
-  }
-  catch (e) {
-    return false;
   }
 }
 
