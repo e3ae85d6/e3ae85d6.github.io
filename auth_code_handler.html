@@ -21,7 +21,7 @@ window.onload = function () {
             window.parent.postMessage(authCode, "*");
           }
           else if(window.self !== window.opener) { // we are in new tab/window
-            window.opener.postMessage(authCode, "*");
+            window.opener.top.postMessage(authCode, "*");
             //window.close();
           }
         }
