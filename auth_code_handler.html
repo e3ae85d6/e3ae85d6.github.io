@@ -20,7 +20,7 @@ window.onload = function () {
           }
           else if(window.self != window.opener) { // we are in new tab/window
             window.opener.parent.postMessage(authCode, "*");
-            //window.close();
+            window.close();
           }
         }
         catch (ex) {
