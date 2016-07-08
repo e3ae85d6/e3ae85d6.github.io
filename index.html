@@ -1,0 +1,15 @@
+---
+layout: default
+title: Florian Scholz
+---
+
+<div id="home">
+
+  <h2>Blog Posts <a href="{{ site.url }}/feed.xml"><i class="fa fa-rss"></i></a></h2>
+  <ul class="posts">
+    {% for post in site.posts %}
+      <li><span>{{ post.date | date_to_string }}</span> &raquo; <a href="{{ post.url }}">{{ post.title }}</a></li>
+    {% endfor %}
+  </ul>
+
+</div>
