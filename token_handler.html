@@ -6,31 +6,33 @@
 <script>
 
 window.onload = function () {
-  var searchArgs = location.href.match("[^?]+\\?([^=]+=[^&]*&?)+");
+  var hash = window.location.hash;
+  
+  /*var searchArgs = location.href.match("[^?]+\\?([^=]+=[^&]*&?)+");
 
   if (searchArgs && (searchArgs.length > 1)) {
     for (var i = 1; i < searchArgs.length; i++) {
       var codeArg = searchArgs[i].match("code=(.*)");
       if(codeArg && (codeArg.length > 1)) {
         var authCode = codeArg[1];
-        
-        try {
-          if(window.self != window.top) { // we are in iframe
-            window.parent.postMessage(authCode, "*");
-          }
-          else if(window.self != window.opener) { // we are in new tab/window
-            window.opener.parent.postMessage(authCode, "*");
-            window.close();
-          }
-        }
-        catch (ex) {
-          console.log(ex);
-        }
-        finally {
-          console.log("authCode\n" + authCode);
-        }
       }
     }
+  }*/
+  
+  try {
+    if(window.self != window.top) { // we are in iframe
+      window.parent.postMessage(hash, "*");
+    }
+    else if(window.self != window.opener) { // we are in new tab/window
+      window.opener.parent.postMessage(hash, "*");
+      window.close();
+    }
+  }
+  catch (ex) {
+    console.log(ex);
+  }
+  finally {
+    console.log("message\n" + hash);
   }
 }
 
