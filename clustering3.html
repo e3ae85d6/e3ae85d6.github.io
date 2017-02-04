@@ -1,0 +1,213 @@
+<html>
+<head>
+    <meta charset=utf-8 />
+    <title>Clustering points</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+
+    <!-- Load Leaflet from CDN-->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.0.2/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.0.2/dist/leaflet-src.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js"></script>
+
+    <!-- Load Esri Leaflet from CDN -->
+    <script src="https://unpkg.com/esri-leaflet@2.0.7"></script>
+
+    <style>
+        body { margin:0; padding:0; }
+        #map { position: absolute; top:0; bottom:0; right:0; left:0; }
+
+        .leaflet-div-icon {
+            /*background: rgba(255, 255, 255, 0);*/
+            border: none;
+            background: none;
+        }
+
+        .adaptiveMarker{
+            position: absolute;
+            top: 10px;
+            left: 4px;
+            width: 14px;
+            height: 23px;
+            background-repeat: no-repeat;
+            background-image: url(images/svg/blue_pin.svg);
+            background-size: 14px 23px;
+            z-index: 999;
+        }
+
+        .adLabelOuter {
+            max-width: 200px;
+            max-height: 60px;
+            position: absolute;
+            top: 1px;
+            left: 19px;
+            padding: 1px 6px 2px 1px;
+            background: rgba(248, 248, 248, 0.64);
+            border-radius: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            pointer-events: none;
+            text-transform: none;
+        }
+
+        .adLabelName {
+            font-weight: bold;
+            line-height: 12px;
+            color: #167efb;
+        }
+
+        .adLabelAttrName {
+            float: left;
+            line-height: 12px;
+            margin-left: 12px;
+            margin-right: 6px;
+            color: #1b71c5;
+            font-size: 8pt;
+        }
+
+        .adLabelAttrVal {
+            line-height: 12px;
+            color: #555;
+            font-size: 8pt;
+            margin-left: 50px;
+        }
+
+    </style>
+</head>
+<body>
+
+<!-- Include Leaflet.markercluster via rawgit.com
+in production you'd be better off hosting these libraries yourself -->
+<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/Leaflet/Leaflet.markercluster/v1.0.0-beta.2.0/dist/MarkerCluster.Default.css">
+<link rel="stylesheet" type="text/css" href="https://cdn.rawgit.com/Leaflet/Leaflet.markercluster/v1.0.0-beta.2.0/dist/MarkerCluster.css">
+<script src="https://cdn.rawgit.com/Leaflet/Leaflet.markercluster/v1.0.0-beta.2.0/dist/leaflet.markercluster.js"></script>
+
+<!-- Load Clustered Feature Layer from CDN -->
+<script src="https://unpkg.com/esri-leaflet-cluster@2.0.0"></script>
+
+<div id="map"></div>
+
+<script>
+    $j = jQuery.noConflict();
+
+    //var map = L.map('map').setView([36.253673, -119.630173], 5);
+    var map = L.map('map').setView([36.228943, -115.142558], 15);
+
+    L.esri.basemapLayer('Streets').addTo(map);
+
+    var pointToLayerFunc = function (geojson, latlng) {
+
+        var name = "Site Name";
+
+        var attr1Name = "Space";
+        var attr1Val = "43.590 SF";
+
+        var attr2Name = "Parking";
+        var attr2Val = "43590";
+
+        var marker = $j("<div>").attr('class', 'adaptiveMarker');
+        var outerLabel = $j("<div>").attr('class', 'adLabelOuter').appendTo(marker);
+
+        $j("<div>").attr('class', 'adLabelName').append(name).appendTo(outerLabel);
+
+        $j("<div>").attr('class', 'adLabelAttribute')
+            .append($j("<div>").attr('class', 'adLabelAttrName').append(attr1Name))
+            .append($j("<div>").attr('class', 'adLabelAttrVal').append(attr1Val))
+            .appendTo(outerLabel);
+
+        $j("<div>").attr('class', 'adLabelAttribute')
+            .append($j("<div>").attr('class', 'adLabelAttrName').append(attr2Name))
+            .append($j("<div>").attr('class', 'adLabelAttrVal').append(attr2Val))
+            .appendTo(outerLabel);
+
+        var html = $j("<div>").append(marker).html();
+
+        return L.marker(latlng, {icon: L.divIcon({html: html})});
+    };
+
+    //  (new constructor syntax at 2.0.0)
+    layer = L.esri.Cluster.featureLayer({
+        url: 'http://services.arcgis.com/qvVnajWeXlTaQQu1/arcgis/rest/services/teststg2_dandreev/FeatureServer/0',
+        showCoverageOnHover: false,
+        zoomToBoundsOnClick: false,
+
+        iconCreateFunction: function(cluster) {
+            var childCount = cluster.getChildCount();
+
+            var c = ' marker-cluster-';
+            if (childCount < 10) {
+                c += 'small';
+            } else if (childCount < 100) {
+                c += 'medium';
+            } else {
+                c += 'large';
+            }
+
+            var markerText = childCount;
+
+            if (childCount > 10000)
+                markerText = ">10k";
+
+            return new L.DivIcon({ html: '<div><span>' + markerText + '</span></div>', className: 'marker-cluster' + c, iconSize: new L.Point(40, 40) });
+        }
+    });
+
+    layer.on('requestsuccess', function (e) {
+        var exceededTransferLimit =
+            e &&
+            e.response &&
+            e.response.properties &&
+            e.response.properties.exceededTransferLimit;
+
+        if (exceededTransferLimit)
+            console.log("exceededTransferLimit!!!");
+    });
+
+    layer.addTo(map);
+
+
+    // make a new VirtualGrid
+    /*var DebugGrid = L.esri.FeatureManager.extend({
+        options: {
+            url: 'https://services.arcgis.com/rOo16HdIMeOBI4Mb/arcgis/rest/services/Trimet_Transit_Stops/FeatureServer/0',
+            cellSize: 64,
+            pathStyle: {
+                color: '#3ac1f0',
+                weight: 2,
+                opacity: 0.5,
+                fillOpacity: 0.25
+            }
+        },
+        initialize: function  (options) {
+            L.esri.FeatureManager.prototype.initialize(this.options);
+
+            L.Util.setOptions(this, options);
+            this.rects = {};
+        },
+        createCell: function (bounds, coords) {
+            L.esri.FeatureManager.prototype.createCell(bounds, coords);
+            this.rects[this.coordsToKey(coords)] = L.rectangle(bounds, this.options.pathStyle).addTo(map);
+        },
+        cellEnter: function (bounds, coords) {
+            L.esri.FeatureManager.prototype.cellEnter(bounds, coords);
+            var rect = this.rects[this.coordsToKey(coords)];
+            map.addLayer(rect);
+        },
+        cellLeave: function (bounds, coords) {
+            L.esri.FeatureManager.prototype.cellLeave(bounds, coords);
+            var rect = this.rects[this.coordsToKey(coords)];
+            map.removeLayer(rect);
+        },
+        coordsToKey: function (coords) {
+            return coords.x + ':' + coords.y + ':' +coords.z;
+        },
+        createLayers: function (features) {
+
+        }
+    });
+    var debugGrid = new DebugGrid().addTo(map);*/
+
+
+</script>
+
+</body>
+</html>
