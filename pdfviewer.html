@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>'Hello, world!' example</title>
+</head>
+<body>
+
+<h1>'Hello, world!' example</h1>
+
+<canvas id="the-canvas" style="border:1px  solid black"></canvas>
+
+<!-- for legacy browsers add compatibility.js -->
+<!--<script src="../compatibility.js"></script>-->
+
+<script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+
+<script id="script">
+    //
+    // If absolute URL from the remote server is provided, configure the CORS
+    // header on that server.
+    //
+    var url = 'https://ago-item-storage.s3-external-1.amazonaws.com/5bdb99eae5a541f3b0b7ebd60a260809/2010_Census_Profile_51a6b40dd-add8-4a12-ada7-70b6145aa1fa.PDF?X-Amz-Security-Token=FQoDYXdzEB4aDGPRcbrUZYzGsaEQRSKcA8TY3mVCEnA7chAcobhx%2F5pXjdM1LzRYyRiMD6dB1GJnKks5wbk5OtWnthGZjXxYlib8jhldPgD0AfBYnK1x%2FhYuyiynl7gTN4No3VxCwGwrb2HvhTu8Q3ckjqadtRZlxPPqV4s6hVnh1XnXWnlzEJG%2BBptk6MyYEgrXki1rzYNXHr7NrnF7ji0IRVbSWj2wGI6jPQkuExk6BQ%2F6%2BjY9PvxclvuowwVzru%2Fmsn6B2AhE5TGwbKd0vxnjqlbyHOllddgFaS%2BSIXkYIdjiPFPe7O4pPjhZBVPM2XOQdj%2FqmUBSRVI7%2BCSTICXIJ1f66gORWLMo1r2u4uOKX4bqrWvmBu%2FX4mkID8hAe50CwL5PyQePdj1sy7MYx%2B6wM0Ln%2BDiaTU9A0kwZGERGbim7xglKWDpp8650wpfCMtTT6pyJroeJoLuJW6xD17JfV9TLiW2OfC5f8kqwEKauY51xDUHJ4ofZ02KFcGz2WEzVEyGGPXflMaRplzZl1syORVdgnPJeAFzGTGJqItuUTKJTchZSSesYsxeEG4RxxbJWDL8o2YWTxQU%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20170215T225518Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIAIXBEALBERW3YVQSA%2F20170215%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Signature=da856f038d56c64639c0b36b0fe942a951eed9f2401498642ff6952c48a7c263';
+    //
+    // Disable workers to avoid yet another cross-origin issue (workers need
+    // the URL of the script to be loaded, and dynamically loading a cross-origin
+    // script does not work).
+    //
+    // PDFJS.disableWorker = true;
+    //
+    // The workerSrc property shall be specified.
+    //
+    PDFJS.workerSrc = 'https://mozilla.github.io/pdf.js/build/pdf.worker.js';
+    //
+    // Asynchronous download PDF
+    //
+    PDFJS.getDocument(url).then(function getPdfHelloWorld(pdf) {
+        //
+        // Fetch the first page
+        //
+        pdf.getPage(1).then(function getPageHelloWorld(page) {
+            var scale = 1.5;
+            var viewport = page.getViewport(scale);
+            //
+            // Prepare canvas using PDF page dimensions
+            //
+            var canvas = document.getElementById('the-canvas');
+            var context = canvas.getContext('2d');
+            canvas.height = viewport.height;
+            canvas.width = viewport.width;
+            //
+            // Render PDF page into canvas context
+            //
+            var renderContext = {
+                canvasContext: context,
+                viewport: viewport
+            };
+            page.render(renderContext);
+        });
+    });
+</script>
+
+<hr>
+<h2>JavaScript code:</h2>
+<pre id="code"></pre>
+<script>
+    document.getElementById('code').textContent =
+        document.getElementById('script').text;
+</script>
+</body>
+</html>
