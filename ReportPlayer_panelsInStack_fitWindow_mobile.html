@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1,user-scalable=no">
+    <title>Report Player Sample (Local)</title>
+
+    <!--<link rel="stylesheet" href="../../../../../../dijit/themes/claro/claro.css">-->
+    <link rel="stylesheet" href="https://baodev.arcgis.com/dijit/themes/claro/claro.css">
+
+    <!--<link rel="stylesheet" href="../../../../../../esri/css/esri.css">-->
+    <link rel="stylesheet" href="https://baodev.arcgis.com/esri/css/esri.css">
+
+    <script>
+        var dojoConfig = { async: true, locale: typeof dojoConfig !== 'undefined' && dojoConfig.locale || null, packages: [{ name: 'dojo', location: './dojo' }, { name: 'dijit', location: './dijit' }, { name: 'dojox', location: './dojox' }, { name: 'dgrid', location: './dgrid' }, { name: 'dstore', location: './dstore' }, { name: 'put-selector', location: './put-selector' }, { name: 'xstyle', location: './xstyle' }, { name: 'esri', location: './esri' }, { name: 'moment', location: './moment' }] };
+    </script>
+
+    <!--<script data-dojo-config="baseUrl: '../../../../../..', isDebug: 1, waitSeconds: 60" src='../../../../../../dojo/dojo.js'></script>-->
+    <script data-dojo-config="baseUrl: 'https://baodev.arcgis.com/', isDebug: 1, waitSeconds: 60" src='https://baodev.arcgis.com/dojo/dojo.js'></script>
+
+    <style>
+        html, body {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            overflow: hidden;
+            font-size: 13px;
+            font-family: "Avenir Next";
+        }
+    </style>
+
+    <script>
+        // params.viewMode
+        // params.resizeMode
+        // params.showToolbarInPopup
+        // params.playerDiv
+        // params.dimensions            {w,h}
+        // params.constraints           {maxWidth, maxHeight}
+        runPlayer = function (params) {
+            document.body.style.opacity = "0.01";
+            require(["require", "esri/dijit/geoenrichment/nlsFix"],
+                function (relativeRequire, nlsFix) {
+                    nlsFix.load(null, relativeRequire);
+
+                    require([
+                            "esri/dijit/geoenrichment/ReportPlayer/ReportPlayer",
+                            "esri/dijit/geoenrichment/ReportPlayer/DataProviderGE",
+                            "esri/dijit/geoenrichment/ReportPlayer/PlayerCommands",
+                            "esri/dijit/geoenrichment/ReportPlayer/PlayerThemes",
+                            "esri/dijit/geoenrichment/ReportPlayer/samples/supportClasses/AnalysisAreas",
+                            "esri/dijit/geoenrichment/utils/signIn/SignInHelper",
+//                            "esri/dijit/geoenrichment/utils/UrlUtil",
+
+                            "dojo/domReady!"
+                        ],
+                        function (
+                            ReportPlayer,
+                            DataProviderGE,
+                            PlayerCommands,
+                            PlayerThemes,
+                            AnalysisAreas,
+                            SignInHelper
+//                            UrlUtil
+                        ) {
+
+                            document.body.style.opacity = "";
+
+//                            function getUrlVar(name) {
+//                                var href = window.location.href;
+//                                return UrlUtil.getVariableValue(href, name);
+//                            };
+
+                            // parse url query parameters
+
+                            var appId = params.appId;// getUrlVar("appId");
+                            var portalUrl = params.portalUrl; //getUrlVar("portalUrl");
+                            var countryID = params.countryID; //getUrlVar("countryID");
+                            var reportID = params.reportID; //getUrlVar("reportID");
+                            var theme = params.theme; //getUrlVar("theme");
+                            var width = params.width; //getUrlVar("width");
+                            var height = params.height; //getUrlVar("height");
+                            var maxWidth = params.maxWidth; //getUrlVar("maxWidth");
+                            var maxHeight = params.maxHeight; //getUrlVar("maxHeight");
+                            var resizeMode = params.resizeMode; //getUrlVar("resizeMode");
+                            var analysisAreasJson = params.analysisAreas; //getUrlVar("analysisAreas");
+                            if (typeof analysisAreasJson === "string")
+                                analysisAreasJson = JSON.parse(analysisAreasJson);
+
+                            var DEFAULTS = {
+                                appId: appId || "g5vpmnaAyj9UmLKJ",
+                                portalUrl: portalUrl || "https://www.arcgis.com",
+                                countryID: countryID || "US",
+                                reportID: reportID || "transportation-to-work-US", // "executive-summary-call-outs-US"//"transportation-to-work-US"
+                                theme: theme || PlayerThemes.DARK
+                            };
+
+                            SignInHelper.signIn({
+                                portalUrl: DEFAULTS.portalUrl,
+                                appId: DEFAULTS.appId,
+                                callback: function () {
+
+                                    var dataProvider = new DataProviderGE();
+                                    dataProvider.registerCommand(PlayerCommands.PDF);
+                                    dataProvider.registerCommand(PlayerCommands.IMAGE);
+                                    dataProvider.registerCommand(PlayerCommands.PRINT);
+                                    dataProvider.registerCommand(PlayerCommands.DYNAMIC_HTML);
+
+                                    var player = new ReportPlayer({
+                                        viewMode: params.viewMode,
+                                        resizeMode: resizeMode || params.resizeMode,
+                                        showToolbarInPopup: params.showToolbarInPopup,
+                                        dataProvider: dataProvider,
+                                        theme: DEFAULTS.theme
+                                    }).placeAt(params.playerDiv)
+
+                                    if (params.dimensions)
+                                        player.resize(params.dimensions.w, params.dimensions.h);
+                                    else if (width && height)
+                                        player.resize(Number(width), Number(height));
+
+                                    if (params.constraints) {
+                                        player.setMaxWidth(params.constraints.maxWidth);
+                                        player.setMaxHeight(params.constraints.maxHeight);
+                                    }
+                                    else if (maxWidth || maxHeight) {
+                                        maxWidth && player.setMaxWidth(Number(maxWidth));
+                                        maxHeight && player.setMaxHeight(Number(maxHeight));
+                                    }
+
+                                    player.playReport({
+                                        portalUrl: DEFAULTS.portalUrl,
+                                        countryID: DEFAULTS.countryID,
+                                        reportID: DEFAULTS.reportID,
+                                        analysisAreas: analysisAreasJson || AnalysisAreas.getAreas({
+                                            numAreas: 2,
+                                            big: false,
+                                            isGeographyId: false,
+                                            initialize: true
+                                        })
+                                    });
+                                }
+                            });
+                        });
+                });
+        };
+
+//        require([
+////                "esri/dijit/geoenrichment/ReportPlayer/samples/useCases/_sample",
+//                "esri/dijit/geoenrichment/ReportPlayer/PlayerResizeModes",
+//                "esri/dijit/geoenrichment/ReportPlayer/PlayerViewModes"
+//            ],
+//            function (
+////                _sample,
+//                PlayerResizeModes,
+//                PlayerViewModes
+//            ) {
+//                _sample.run({
+//                    viewMode: PlayerViewModes.PANELS_IN_STACK,
+//                    resizeMode: PlayerResizeModes.FIT_WINDOW,
+//                    showToolbarInPopup: false,
+//                    playerDiv: playerDiv
+//                });
+//            });
+
+        function runInfographics(params) {
+            require([
+                    "esri/dijit/geoenrichment/ReportPlayer/PlayerResizeModes",
+                    "esri/dijit/geoenrichment/ReportPlayer/PlayerViewModes",
+
+                    "dojo/domReady!"
+                ],
+                function (
+                    PlayerResizeModes,
+                    PlayerViewModes
+                ) {
+                    params.viewMode = PlayerViewModes.PANELS_IN_STACK;
+                    params.resizeMode = PlayerResizeModes.FIT_WINDOW;
+                    params.showToolbarInPopup = false;
+                    params.playerDiv = playerDiv;
+
+                    runPlayer(params);
+                });
+        }
+
+        function setInfographicsParams(params) {
+            setTimeout(function () {
+                runInfographics(params)
+            }, 1);
+        }
+
+    </script>
+</head>
+<body class="claro">
+<div id="playerDiv"></div>
+</body>
+</html>
